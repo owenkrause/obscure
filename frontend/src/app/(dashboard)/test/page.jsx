@@ -1,47 +1,57 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAES } from "@/hooks/useAES";
+import {
+  arrayBufferToBlobUrl,
+  encryptAndUploadFile,
+  fetchEncryptedFile,
+} from "@/lib/ipfs";
 import { useState } from "react";
 
 export default function Test() {
-  const [file, setFile] = useState();
-  const [url, setUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
-
-  const uploadFile = async () => {
-    try {
-      if (!file) {
-        alert("No file selected");
-        return;
-      }
-
-      setUploading(true);
-      const data = new FormData();
-      data.set("file", file);
-      const uploadRequest = await fetch("/api/files", {
-        method: "POST",
-        body: data,
-      });
-      const ipfsUrl = await uploadRequest.json();
-      setUrl(ipfsUrl);
-      setUploading(false);
-    } catch (e) {
-      console.log(e);
-      setUploading(false);
-      alert("Trouble uploading file");
-    }
-  };
-
-  const handleChange = (e) => {
-    setFile(e.target?.files?.[0]);
-  };
+  const { key, encrypt, decrypt } = useAES("tier1");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [cid, setCid] = useState(null);
+  const [iv, setIv] = useState(null);
 
   return (
-    <main className="w-full min-h-screen m-auto flex flex-col justify-center items-center">
-      <input type="file" onChange={handleChange} />
-      <button disabled={uploading} onClick={uploadFile}>
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
-      <a href={url}>{url}</a>
-    </main>
+    <div className="max-w-2xl mx-auto mt-12 space-y-4">
+      <Label htmlFor="picture">Picture</Label>
+      <Input
+        id="picture"
+        type="file"
+        onChange={(event) => {
+          setSelectedImage(event.target.files[0]);
+        }}
+      />
+      {cid && <p>CID: {cid}</p>}
+      {iv && <p>IV: {iv}</p>}
+      <Button
+        onClick={async () => {
+          const { iv, cid } = await encryptAndUploadFile(key, selectedImage);
+          setCid(cid);
+          setIv(iv);
+        }}
+        disabled={!selectedImage}
+      >
+        Upload + Encrypt
+      </Button>
+      <br />
+      {preview && <img src={preview} alt="a preview of image" />}
+      <Button
+        onClick={async () => {
+          const { iv, encryptedData } = await fetchEncryptedFile(cid);
+          const arrayBuffer = await decrypt(iv, encryptedData);
+          setPreview(arrayBufferToBlobUrl(arrayBuffer));
+        }}
+        disabled={!(iv && cid)}
+      >
+        Download + Decrypt
+      </Button>
+    </div>
   );
 }
