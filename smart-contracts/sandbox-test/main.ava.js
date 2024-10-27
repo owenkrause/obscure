@@ -31,15 +31,15 @@ test.afterEach.always(async (t) => {
   });
 });
 
-test('returns the default greeting', async (t) => {
-  const { contract } = t.context.accounts;
-  const greeting = await contract.view('get_greeting', {});
-  t.is(greeting, 'Hello');
-});
+// test('returns the default greeting', async (t) => {
+//   const { contract } = t.context.accounts;
+//   const greeting = await contract.view('get_greeting', {});
+//   t.is(greeting, 'Hello');
+// });
 
-test('changes the greeting', async (t) => {
+test('creates a subscription', async (t) => {
   const { root, contract } = t.context.accounts;
-  await root.call(contract, 'set_greeting', { greeting: 'Howdy' });
-  const greeting = await contract.view('get_greeting', {});
+  await root.call(contract, 'create_subscription', { title: 'hello world', price: BigInt(1000 * 1000), expiration: BigInt(Date.now()) });
+  const greeting = await contract.view('get_subscriptions', {});
   t.is(greeting, 'Howdy');
 });
