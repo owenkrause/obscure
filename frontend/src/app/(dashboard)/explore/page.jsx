@@ -1,4 +1,4 @@
-import CreatorCard from "./(components)/creatorCard";
+import CreatorCard from "./creatorCard";
 import { CREATORS } from "@/hooks/useCreators";
 
 export default function Explore() {
