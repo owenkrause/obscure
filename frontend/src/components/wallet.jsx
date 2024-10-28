@@ -22,5 +22,9 @@ export function Wallet() {
     }
   }, [signedAccountId, wallet]);
 
-  return <Button onClick={action}>{label}</Button>;
+  return (
+    <Button variant="outline" onClick={action}>
+      {label}
+    </Button>
+  );
 }

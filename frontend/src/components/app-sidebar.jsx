@@ -15,7 +15,7 @@ import { House, Search, SquarePen } from "lucide-react";
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader />
+      <SidebarHeader className="h-12" />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
